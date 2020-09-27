@@ -21,4 +21,6 @@ RUN pip3 install -t /usr/local/lib/python3.6/site-packages mod_wsgi
 WORKDIR /var/www/candle_stick/docker_conf
 RUN cat module.conf >> /etc/apache2/apache2.conf
 RUN cat virtual_host.conf > /etc/apache2/sites-enabled/000-default.conf
+RUN chmod -R 777 /var/www/candle_stick/datasets
+WORKDIR /var/www/candle_stick
 CMD ["apachectl", "-D",  "FOREGROUND"]
