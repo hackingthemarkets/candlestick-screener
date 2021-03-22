@@ -1,9 +1,5 @@
 import os, csv, sys
-import talib
 import yfinance as yf
-import pandas
-from flask import Flask, escape, request, render_template
-from patterns import candlestick_patterns
 import datetime
 
 if __name__ == '__main__':
