@@ -31,9 +31,9 @@ def index():
             stocks[row[0]] = {'company': row[1]}
 
     if pattern:
+        pattern_function = getattr(talib, pattern)
         for filename in os.listdir('datasets/daily'):
-            df = pandas.read_csv('datasets/daily/{}'.format(filename))
-            pattern_function = getattr(talib, pattern)
+            df = pandas.read_csv('datasets/daily/{}'.format(filename))    
             symbol = filename.split('.')[0]
 
             try:
