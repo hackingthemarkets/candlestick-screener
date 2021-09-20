@@ -1,0 +1,41 @@
+{
+    "deliveryStatus": {
+        "order_id": "CO2106101875627",
+        "request_id": "CDS_SA_10138-CO2106101875627-01",
+        "lines": [
+            {
+                "line_number": 1,
+                "line_id": "6181081",
+                "sku": "262747",
+                "status": "delivered",
+                "reason": "",
+                "event_date_time": "21\/07\/2021 03:38:01",
+                "remark": "",
+                "shipment_provider": "Kerry",
+                "tracking_number": "CO2106101875627",
+                "tracking_url": "https:\/\/th.kerryexpress.com\/th\/track\/"
+            }
+        ]
+    }
+}
+-------------------------------------------------------------------------------
+{
+    "deliveryStatus": {
+        "order_id": "CO2106101875627",
+        "request_id": "CDS_SA_10138-CO2106101875627-01",
+        "lines": [
+            {
+                "line_number": 1,
+                "line_id": "6181081",
+                "sku": "CDS262747",
+                "status": "delivered",
+                "reason": "",
+                "event_date_time": "21\/07\/2021 03:40:55",
+                "remark": "",
+                "shipment_provider": "",
+                "tracking_number": "KNJ0300355826",
+                "tracking_url": ""
+            }
+        ]
+    }
+}

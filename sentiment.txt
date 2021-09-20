@@ -1,0 +1,7 @@
+Transaction fees on Bitcoin and Ethereum have fallen by 81% and 71% respectively over the last few weeks, as the broader cryptocurrency market continues to descend from its recent all-time high.
+
+The average cost of using the Ethereum blockchain fell from $69.92 per transaction on May 12, to $20.06 by May 16, according to data from Bitinfocharts. In the same time period the Ether (ETH) spot price both peaked and crashed, falling from an all-time high of $4,358 on May 12, to $3,183 just prior to publication — a 27% decline.
+
+Before 2021’s market surge, Ethereum’s current average fee of $20 would have been an all-time high by some margin. As recently as 2020, average usage costs were lower than $0.10. The rapid surge in the cost of using Ethereum comes after the emergence of decentralized finance apps — which now make up four out of the top five gas burners on the blockchain — and the increased attention brought to the blockchain amid 2021’s market boom.
+
+Ethereum’s daily user count quadrupled since the beginning of 2020, climbing from around 400,000 to 1.6 million according to Bitinfocharts. This number does not account for transactions taking place on Ethereum’s layer 2 protocols.
