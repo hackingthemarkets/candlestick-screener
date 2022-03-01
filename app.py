@@ -1,3 +1,4 @@
+from distutils.log import debug
 import os, csv
 import talib
 import yfinance as yf
@@ -14,7 +15,7 @@ def snapshot():
             if "," not in line:
                 continue
             symbol = line.split(",")[0]
-            data = yf.download(symbol, start="2020-01-01", end="2020-08-01")
+            data = yf.download(symbol, start="2020-01-01", end="2022-28-02")
             data.to_csv('datasets/daily/{}.csv'.format(symbol))
 
     return {
@@ -50,3 +51,7 @@ def index():
                 print('failed on filename: ', filename)
 
     return render_template('index.html', candlestick_patterns=candlestick_patterns, stocks=stocks, pattern=pattern)
+
+
+if __name__ == '__main__':
+    app.run( debug=True,host= '0.0.0.0', port ='5004')
