@@ -1,0 +1,243 @@
+variables:
+  CREED_IMAGE: "asia.gcr.io/core-287413/creed"
+  DOCKER_AUTH_CONFIG: "${CICD_REGISTRY}"
+  RUN_TAG: "activeAND"
+  DEFAULT_USER_SET: "agent1"
+  DEFAULT_DOMAIN: "STAGING"
+  DEFAULT_ENVIRONMENT: "STAGING"
+  DEFAULT_DEVICE: "MOBILE"
+  # DEFAULT_PRODUCT: "CL"
+  PRODUCTION_TAG: ""  ##ANDPRODUCTION
+  IS_MANUAL: "False"
+  IS_HEADLESS: "True"
+
+stages:
+  - build
+  - test
+  - merge
+  - report
+ 
+
+build-Creed-image:
+  stage: build
+  image: docker:19.03.12
+  before_script:
+    - if [[ ! -z ${AVOID_BUILD} ]];then exit 0; fi
+    - cat ${GCP_CORE_TOKEN} | docker login -u _json_key --password-stdin https://asia.gcr.io
+  script:
+    - echo ${CI_COMMIT_SHA::8}
+    - docker build -t ${CREED_IMAGE}:${CI_COMMIT_SHA::8} . --no-cache
+    - docker tag ${CREED_IMAGE}:${CI_COMMIT_SHA::8} ${CREED_IMAGE}:latest
+    - docker push ${CREED_IMAGE}:${CI_COMMIT_SHA::8}
+    - docker push ${CREED_IMAGE}:latest
+  tags:
+    - kraken-runner
+  only:
+    # changes:
+    #   - Resources/**/*
+    #   - TestCase/**/*
+    #   - PythonFunction/*
+    #   - requirement.txt
+    #   - Dockerfile
+    refs:
+      - /^develop.*$/
+      - main
+
+PIGSPIN-CL-DESKTOP-chrome-test:
+  before_script:
+    - if [ "${IS_MANUAL}" == "True" ];then exit 0; fi
+  variables:
+    PRODUCT: "CL"
+    BROWSER: "chrome"
+    DEVICE: "DESKTOP"
+    USER_SET: "agent1"
+  stage: test
+  extends:
+    - .condition-execute
+    - .execute-automate-test
+
+PIGSPIN-BO-DESKTOP-chrome-test:
+  before_script:
+    - if [ "${IS_MANUAL}" == "True" ];then exit 0; fi
+  variables:
+    PRODUCT: "BO"
+    BROWSER: "chrome"
+    DEVICE: "DESKTOP"
+    USER_SET: "agent1"
+  stage: test
+  extends:
+    - .condition-execute
+    - .execute-automate-test
+
+PIGSPIN-CL-MOBILE-chrome-test:
+  before_script:
+    - if [ "${IS_MANUAL}" == "True" ];then exit 0; fi
+  variables:
+    PRODUCT: "CL"
+    BROWSER: "chrome"
+    DEVICE: "MOBILE"
+    USER_SET: "agent2"
+  stage: test
+  extends:
+    - .condition-execute
+    - .execute-automate-test
+
+PIGSPIN-CL-TABLET-chrome-test:
+  before_script:
+    - if [ "${IS_MANUAL}" == "True" ];then exit 0; fi
+  variables:
+    PRODUCT: "CL"
+    BROWSER: "chrome"
+    DEVICE: "TABLET"
+    USER_SET: "agent3"
+  stage: test
+  extends:
+    - .condition-execute
+    - .execute-automate-test
+
+PIGSPIN-CL-API-chrome-test:
+  before_script:
+    - if [ "${IS_MANUAL}" == "True" ];then exit 0; fi
+  variables:
+    PRODUCT: "CL"
+    BROWSER: "chrome"
+    DEVICE: "API"
+    USER_SET: "agent3" ##Need to set agent 4
+  stage: test
+  extends:
+    - .condition-execute
+    - .execute-automate-test
+
+PIGSPIN-CASINO-MOBILE-chrome-test:
+  before_script:
+    - if [ "${IS_MANUAL}" == "True" ];then exit 0; fi
+  variables:
+    PRODUCT: "CASINO"
+    BROWSER: "chrome"
+    DEVICE: "MOBILE"
+    USER_SET: "agent2"
+  stage: test
+  extends:
+    - .condition-execute
+    - .execute-automate-test
+
+PIGSPIN-MANUAL-test:
+  before_script:
+    - if [ "${IS_MANUAL}" != "True" ];then exit 0; fi
+  stage: test
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "schedule"
+    - if: $CI_PIPELINE_SOURCE == "web"
+  extends:
+    - .execute-automate-test-manual
+
+.condition-execute:
+  only:
+    - /^develop.*$/
+    - main
+    - util
+
+.execute-automate-test:
+  stage: test
+  image: "${CREED_IMAGE}"
+  script:
+    - echo ${RUN_TAG}${DEVICE}
+    - robot --nostatusrc -v ar_HEADLESS:$IS_HEADLESS -v ar_BROWSER:${BROWSER:-$DEFAULT_BROWSER} -v ar_ENVIRONMENT:${ENVIRONMENT:-$DEFAULT_ENVIRONMENT} -v ar_DOMAIN:${DOMAIN:-$DEFAULT_DOMAIN} -v ar_USER_SET:${USER_SET:-$DEFAULT_USER_SET} -v ar_DEVICE:${DEVICE:-$DEFAULT_DEVICE} -v ar_PRODUCT:${PRODUCT} -i ${RUN_TAG}${DEVICE}${PRODUCTION_TAG} -d Tests/Report/ -o "output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_${PRODUCT}_${BROWSER}_${DEVICE}_tmp.xml" TestCase/${PRODUCT}/${DEVICE}/*.robot
+    - rm -f Tests/Report/*.html
+    - rebot --nostatusrc -N "${PRODUCT}_${DEVICE}" -l "log_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_${PRODUCT}_${BROWSER}_${DEVICE}_tmp.html" -r "report_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_${PRODUCT}_${BROWSER}_${DEVICE}_tmp.html" -o "output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_${PRODUCT}_${BROWSER}_${DEVICE}_tmp.xml" -d Tests/Report/ Tests/Report/output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_${PRODUCT}_${BROWSER}_${DEVICE}_tmp.xml
+    - rm -f Tests/Report/*.html
+    - ls -la Tests/Report/
+    # -
+  artifacts:
+    expire_in: 1 hrs
+    paths:
+      - Tests/Report/
+  tags:
+    - kraken-runner
+
+.execute-automate-test-manual:
+  stage: test
+  image: "${CREED_IMAGE}"
+  script:
+    - echo ${RUN_TAG:-$DEFAULT_RUN_TAG_ACTIVE}${DEVICE:-$DEFAULT_DEVICE}
+    - robot --nostatusrc -v ar_HEADLESS:$IS_HEADLESS -v ar_BROWSER:${BROWSER:-$DEFAULT_BROWSER} -v ar_ENVIRONMENT:${ENVIRONMENT:-$DEFAULT_ENVIRONMENT} -v ar_DOMAIN:${DOMAIN:-$DEFAULT_DOMAIN} -v ar_USER_SET:${USER_SET:-$DEFAULT_USER_SET} -v ar_DEVICE:$DEVICE -v ar_PRODUCT:${PRODUCT:-$DEFAULT_PRODUCT} -i ${RUN_TAG:-$DEFAULT_RUN_TAG_ACTIVE}${DEVICE:-$DEFAULT_DEVICE} -d Tests/Report/ -o "output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_${PRODUCT}_${BROWSER}_${DEVICE}_tmp.xml" TestCase/${PRODUCT}/${DEVICE}/*.robot
+    # -
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - Tests/Report/
+  tags:
+    - kraken-runner
+
+merge-log:
+  stage: merge
+  image: "${CREED_IMAGE}"
+  script:
+    - mkdir public
+    - mv Tests/Report/* public/
+    - ls public/
+    - rebot --nostatusrc -N "Output" -o "output.xml" -l "log.html" -r "report.html" -d public public/output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_CL_chrome_DESKTOP_tmp.xml public/output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_CL_chrome_MOBILE_tmp.xml public/output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_CL_chrome_TABLET_tmp.xml public/output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_CL_chrome_API_tmp.xml public/output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_BO_chrome_DESKTOP_tmp.xml public/output_${ENVIRONMENT:-$DEFAULT_ENVIRONMENT}_CASINO_chrome_MOBILE_tmp.xml
+    - echo "LAST_EXECUTE_JOB_ID=$CI_JOB_ID" >> build.env
+  artifacts:
+    reports:
+      dotenv: build.env
+    expire_in: 1 week
+    paths:
+      - public/
+  tags:
+    - kraken-runner
+  only:
+    - /^develop.*$/
+    - main
+
+send-report-slack:
+  stage: report
+  image: "${CREED_IMAGE}"
+  variables:
+    DEFAULT_DESCRIPTION: "Trigger from QA"
+  script:
+    - pip list
+    - python3 PythonFunction/ReadRobotReport.py "${HERA_MESSAGE:-$DEFAULT_DESCRIPTION}" https://bluepicode.gitlab.io/-/qa/pigspin-automate/-/jobs/$LAST_EXECUTE_JOB_ID/artifacts/public/report.html
+  needs:
+    - job: merge-log
+      artifacts: true
+  tags:
+    - kraken-runner
+  only:
+    - /^develop.*$/
+    - main
+
+send-report-ggsheet:
+  stage: report
+  image: "${CREED_IMAGE}"
+  variables:
+    DEFAULT_DESCRIPTION: "Trigger from QA"
+    GG_SHEET: "GG_SHEET"
+  script:
+    - pip list
+    - python3 PythonFunction/ReadAndSendStatusToGGSheet.py
+  needs:
+    - job: merge-log
+      artifacts: true
+  tags:
+    - kraken-runner
+  only:
+    - /^develop.*$/
+    - main
+
+send-casino-report-ggsheet:
+  stage: report
+  image: "${CREED_IMAGE}"
+  variables:
+    DEFAULT_DESCRIPTION: "Trigger from QA"
+  script:
+    - pip list
+    - python3 PythonFunction/SendCasinoReportToGGSheet.py
+  needs:
+    - job: merge-log
+      artifacts: true
+  tags:
+    - kraken-runner
+  only:
+    - /^develop.*$/
+    - main

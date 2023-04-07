@@ -1,4 +1,4 @@
-import talib
+# import talib
 import numpy as np
 import yfinance as yf 
 import os, pandas
@@ -11,9 +11,9 @@ class Doji:
     def __init__(self, symbols):
         self.symbols = symbols
 
-        start = "2021-05-10"
+        start = "2023-03-10"
         # end = datetime.datetime.now()
-        end = "2021-09-9"
+        end = "2023-04-6"
 
         stock = []
         change = []
@@ -91,7 +91,7 @@ class Doji:
         # df1 = df.assign(Change = change)
         df2 = df.assign(Price = current)
         df3 = df2.assign(Volume = volume)
-        df3.to_csv('./daily_stock/pull_back/pull_back8sep'+'.csv')
+        df3.to_csv('./daily_stock/pull_back/pull_back{end}'+'.csv')
 
         print(df3)
         print(stock)

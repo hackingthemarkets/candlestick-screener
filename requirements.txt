@@ -4,9 +4,9 @@ pandas
 yfinance
 matplotlib
 pandas_datareader
-pylab
+# pylab
 mplfinance
-sci-kit 
+# sci-kit 
 tensorflow
 numpy
 datetime
